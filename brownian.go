@@ -6,7 +6,13 @@ import (
 	"sort"
 )
 
+type Process interface {
+	At(float64) float64
+}
+
 type Brownian struct {
+	Process
+
 	// A slice of (t, v) pairs, where t is the time and v is the value
 	// of the Brownian motion
 	states []brownianState
@@ -23,22 +29,7 @@ type brownianState struct {
 	v float64
 }
 
-// Implement the sort.Interface interface
-func (b *Brownian) Len() int {
-	return len(b.states)
-}
-
-func (b *Brownian) Less(i, j int) bool {
-	return b.states[i].t <= b.states[j].t
-}
-
-func (b *Brownian) Swap(i, j int) {
-	b.states[i], b.states[j] = b.states[j], b.states[i]
-}
-
-type Process interface {
-	At(float64) float64
-}
+type brownianStateSlice []brownianState
 
 func (b *Brownian) At(t float64) float64 {
 	// Make sure (0, 0) is in the points
@@ -86,8 +77,49 @@ func (b *Brownian) At(t float64) float64 {
 
 	// Add the new state to the slice of states, in sorted order
 	b.states = append(b.states, new_state)
-	sort.Sort(b)
+	sort.Sort(brownianStateSlice(b.states))
 
 	// Finally, return the actual value
 	return new_state.v
+}
+
+/* Implement the sort.Interface interface method Len */
+func (b brownianStateSlice) Len() int {
+	return len(b)
+}
+
+/* Implement the sort.Interface interface method Less */
+func (b brownianStateSlice) Less(i, j int) bool {
+	return b[i].t <= b[j].t
+}
+
+/* Implement the sort.Interface interface method Swap */
+func (b brownianStateSlice) Swap(i, j int) {
+	b[i], b[j] = b[j], b[i]
+}
+
+type GeometricBrownian struct {
+	// Inherit from standard Brownian Motion
+	Brownian
+
+	// The drift of the process
+	Drift float64
+
+	// The volatility of the process
+	Volatility float64
+
+	// The square root of the volatility
+	std_dev float64
+}
+
+func NewGeometricBrownian(rand *rand.Rand, drift float64, volatility float64) *GeometricBrownian {
+	std_dev := math.Sqrt(volatility)
+	return &GeometricBrownian{Brownian: Brownian{Rand: rand},
+		Drift: drift, Volatility: volatility, std_dev: std_dev}
+}
+
+func (b *GeometricBrownian) At(t float64) float64 {
+	v := b.Brownian.At(t)
+
+	return math.Exp((b.Drift-b.Volatility/2)*t + b.std_dev*v)
 }
