@@ -27,11 +27,11 @@ func NormalCDF(mu float64, sigma float64) func(float64, float64) float64 {
 		if x == mu {
 			return .5
 		} else if x > mu {
-			return .5 + goint.SimpsonIntegration(pdf, mu, x, h)
+			return .5 + goint.Integrate(pdf, mu, x, h)
 		}
 
 		// We have that x < mu
-		return .5 - goint.SimpsonIntegration(pdf, x, mu, h)
+		return .5 - goint.Integrate(pdf, x, mu, h)
 	}
 }
 

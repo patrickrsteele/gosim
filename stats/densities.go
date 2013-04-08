@@ -13,7 +13,7 @@ type Function func(float64) float64
 /* Compute a cdf by integrating a pdf with step size h */
 func CDFFromPDF(pdf Function, h float64) Function {
 	return func(x float64) float64 {
-		return goint.SimpsonIntegration((func(float64) float64)(pdf), math.Inf(-1), x, h)
+		return goint.Integrate((func(float64) float64)(pdf), math.Inf(-1), x, h)
 	}
 }
 
@@ -28,30 +28,20 @@ func InvCDFFromCDF(cdf Function, h float64) Function {
 		L := -1.0
 		U := 1.0
 
-		hh := h
-		for cdf(U, hh) < p {
+		for cdf(U) < p {
 			U *= 2
-			hh *= 2
-			if hh > 1 {
-				hh = 1
-			}
 		}
 
-		hh = h
-		for cdf(L, hh) > p {
+		for cdf(L) > p {
 			L *= 2
-			hh *= 2
-			if hh > 1 {
-				hh = 1
-			}
 		}
 
 		// Start bisection; halt when we're close enough to the proper percentile, or no progress is made
-		pL := cdf(L, h)
-		pU := cdf(U, h)
+		pL := cdf(L)
+		pU := cdf(U)
 		for pU-pL > 2*perr && U-L > berr {
 			M := (L + U) / 2
-			pM := cdf(M, h)
+			pM := cdf(M)
 
 			if pM > p {
 				U = M
