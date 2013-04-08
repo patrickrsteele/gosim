@@ -29,11 +29,11 @@ func StudentCDF(d int, h float64) func(float64) float64 {
 		if x == 0 {
 			return .5
 		} else if x > 0 {
-			return .5 + goint.SimpsonIntegration(pdf, 0, x, h)
+			return .5 + goint.Integrate(pdf, 0, x, h)
 		}
 
 		// We have that x < 0
-		return .5 - goint.SimpsonIntegration(pdf, x, 0, h)
+		return .5 - goint.Integrate(pdf, x, 0, h)
 	}
 }
 

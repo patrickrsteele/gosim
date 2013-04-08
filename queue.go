@@ -1,7 +1,5 @@
 package gosim
 
-/* A useful collection of simulation objects, such as queues. */
-
 import (
 	"bytes"
 	"fmt"
