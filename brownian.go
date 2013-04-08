@@ -110,16 +110,19 @@ type GeometricBrownian struct {
 
 	// The square root of the volatility
 	std_dev float64
+
+	// The scaling coefficient
+	Scale float64
 }
 
-func NewGeometricBrownian(rand *rand.Rand, drift float64, volatility float64) *GeometricBrownian {
+func NewGeometricBrownian(rand *rand.Rand, scale, drift, volatility float64) *GeometricBrownian {
 	std_dev := math.Sqrt(volatility)
 	return &GeometricBrownian{Brownian: Brownian{Rand: rand},
-		Drift: drift, Volatility: volatility, std_dev: std_dev}
+		Drift: drift, Volatility: volatility, std_dev: std_dev, Scale: scale}
 }
 
 func (b *GeometricBrownian) At(t float64) float64 {
 	v := b.Brownian.At(t)
 
-	return math.Exp((b.Drift-b.Volatility/2)*t + b.std_dev*v)
+	return b.Scale * math.Exp((b.Drift-b.Volatility/2)*t+b.std_dev*v)
 }
