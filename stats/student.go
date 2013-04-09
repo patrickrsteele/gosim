@@ -1,7 +1,7 @@
 package stats
 
 import (
-	"goint"
+	"github.com/patrickrsteele/goint"
 	"math"
 )
 
