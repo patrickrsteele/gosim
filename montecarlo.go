@@ -24,19 +24,24 @@ func NewMonteCarlo(f Trial) *MonteCarloSimulation {
 
 /* Simulate N trials and report a (1 - alpha)-level confidence interval */
 func (m *MonteCarloSimulation) Simulate(N int, alpha float64) *Estimate {
-	const (
-		h = 1e-6
-	)
 
 	values := make([]float64, N)
 	for i, _ := range values {
 		values[i] = m.F()
 	}
 
-	mean, variance := Summary(values)
+	return create_estimate(values, alpha)
+}
+
+func create_estimate(data []float64, alpha float64) *Estimate {
+	const (
+		h = 1e-6
+	)
+
+	mean, variance := Summary(data)
 
 	coef := stats.InvStandardNormalCDF(h)(1 - alpha/2)
-	coef *= math.Sqrt(variance / float64(N))
+	coef *= math.Sqrt(variance / float64(len(data)))
 
 	return &Estimate{V: mean, C: &CI{Level: alpha, L: -coef, U: coef}}
 }

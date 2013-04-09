@@ -1,8 +1,12 @@
 package gosim
 
-/* A function that returns a value of intersest along with one control
-/* variate. */
-type TrialWithControl func() (float64, float64)
+import (
+	"github.com/skelterjohn/go.matrix"
+)
+
+/* A function that returns a value of intersest along with any number
+/* of control variates. */
+type TrialWithControl func() (float64, []float64)
 
 type MonteCarloWithControl struct {
 	Simulation
@@ -19,27 +23,81 @@ func (m *MonteCarloWithControl) Simulate(N int, alpha float64) *Estimate {
 		h = 1e-6
 	)
 
-	values := make([]float64, N)
-	controls := make([]float64, N)
-	for i, _ := range values {
-		value[i], controls[i] = m.F()
+	// We require at least one trial
+	if N <= 1 {
+		panic("N must be greater than 1")
 	}
 
-	value_mean, value_variance := Summary(values)
-	control_mean, control_variance := Summary(controls)
+	n := float64(N)
 
-	// Compute the correlation coefficient of the value of interest and
-	// the control variate
-	num := 0.0
-	for i, _ := range values {
-		num += (values[i] - value_mean) * (controls[i] - control_mean)
+	// Run all trials, storing the results in ys and the controls in xs
+	ys := make([]float64, N)
+	xs := make([][]float64, N)
+	for i, _ := range ys {
+		ys[i], xs[i] = m.F()
 	}
 
-	rho := num / ((float64(N) - 1) * math.Sqrt(value_variance*control_variance))
-	variance := (1 - rho*rho) * value_variance
+	d := len(xs[0])
+	// If there are no control variates, just do standard Monte Carlo
+	if d == 0 {
+		return create_estimate(ys, alpha)
+	}
 
-	coef := stats.InvStandardNormalCDF(h)(1 - alpha/2)
-	coef *= math.Sqrt(variance / float64(N))
+	// Compute the means of the control variates
+	x_means := make([]float64, d)
+	for _, X := range xs {
+		for j, _ := range x_means {
+			x_means[j] += X[j]
+		}
+	}
+	for j, _ := range x_means {
+		x_means[j] /= n
+	}
 
-	return &Estimate{V: mean, C: &CI{Level: alpha, L: -coef, U: coef}}
+	// Compute the mean of the target
+	y_mean := Mean(ys)
+
+	// Compute the sample covariance of the control variates
+	Sx := matrix.MakeDenseMatrix(make([]float64, d*d), d, d)
+	for j := 0; j < d; j++ {
+		for k := 0; k < d; k++ {
+			entry := 0.0
+			for i, _ := range xs {
+				entry += xs[i][j]*xs[i][k] - n*x_means[j]*x_means[k]
+			}
+			entry /= n - 1
+
+			Sx.Set(j, k, entry)
+		}
+	}
+
+	// Compute the sample covariance of the control variates and the
+	// response
+	Sxy := matrix.MakeDenseMatrix(make([]float64, d), d, 1)
+	for j := 0; j < d; j++ {
+		entry := 0.0
+		for i, _ := range ys {
+			entry += xs[i][j]*ys[i] - n*x_means[j]*y_mean
+		}
+		entry /= n - 1
+
+		Sxy.Set(j, 0, entry)
+	}
+
+	// Compute the control variate weights
+	b := matrix.Product(matrix.Inverse(Sx), Sxy)
+
+	// Compute the offset estimates
+	yoff := make([]float64, N)
+	for i, _ := range yoff {
+		yoff[i] = ys[i]
+
+		for j := 0; j < d; j++ {
+			yoff[j] -= b.Get(j, 0) * (xs[i][j] - x_means[j])
+		}
+	}
+
+	// Compute the point estimate and sample variance of the offset
+	// values
+	return create_estimate(yoff, alpha)
 }
