@@ -7,13 +7,13 @@ import (
 )
 
 type Simulation interface {
-	/* Simulate N trials and report a (1 - alpha)-level confidence
-	/* interval */
+	// Simulate N trials and report a (1 - alpha)-level confidence
+	// interval
 	Simulate(N int, alpha float64) *Estimate
 }
 
-/* Return an estimate of a parameter along with a slice of control variates;
-/* the slice can be nil. */
+// Return an estimate of a parameter along with a slice of control
+// variates; the slice can be nil.
 type Trial func() (float64, []float64)
 
 type MonteCarloSimulation struct {
@@ -25,7 +25,8 @@ func NewMonteCarlo(f Trial) *MonteCarloSimulation {
 	return &MonteCarloSimulation{F: f}
 }
 
-/* Simulate N trials and report a (1 - alpha)-level confidence interval */
+// Simulate N trials and report a (1 - alpha)-level confidence
+// interval
 func (m *MonteCarloSimulation) Simulate(N int, alpha float64) *Estimate {
 	// We require at least one trial
 	if N <= 1 {
@@ -62,8 +63,8 @@ func create_estimate(data []float64, alpha float64) *Estimate {
 	return &Estimate{V: mean, C: &CI{Level: alpha, L: -coef, U: coef}}
 }
 
-/* Return a Monte Carlo estimate of the parameter, using the data in
-/* xs[i] as a control variate for observation ys[i]. */
+// Return a Monte Carlo estimate of the parameter, using the data in
+// xs[i] as a control variate for observation ys[i].
 func control_estimate(ys []float64, xs [][]float64, alpha float64) *Estimate {
 	d := len(xs[0])
 	N := len(ys)

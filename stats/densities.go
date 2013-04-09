@@ -1,3 +1,5 @@
+// These functions provide a general framework for manipulating pdfs,
+// cdfs, and inverse cdfs.
 package stats
 
 import (
@@ -5,20 +7,17 @@ import (
 	"math"
 )
 
-/* These functions provide a general framework for manipulating pdfs,
-/* cdfs, and inverse cdfs. */
-
 type Function func(float64) float64
 
-/* Compute a cdf by integrating a pdf with step size h */
+// Compute a cdf by integrating a pdf with step size h
 func CDFFromPDF(pdf Function, h float64) Function {
 	return func(x float64) float64 {
 		return goint.Integrate((func(float64) float64)(pdf), math.Inf(-1), x, h)
 	}
 }
 
-/* Returns a function that is the inverse of the given cdf, computed
-/* with a step size of h. */
+// Returns a function that is the inverse of the given cdf, computed
+// with a step size of h.
 func InvCDFFromCDF(cdf Function, h float64) Function {
 	const perr = 1e-5  // Acceptable percentile error
 	const berr = 1e-10 // Acceptable bounds error

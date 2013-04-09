@@ -83,17 +83,17 @@ func (b *Brownian) At(t float64) float64 {
 	return new_state.v
 }
 
-/* Implement the sort.Interface interface method Len */
+// Implement the sort.Interface interface method Len
 func (b brownianStateSlice) Len() int {
 	return len(b)
 }
 
-/* Implement the sort.Interface interface method Less */
+// Implement the sort.Interface interface method Less
 func (b brownianStateSlice) Less(i, j int) bool {
 	return b[i].t <= b[j].t
 }
 
-/* Implement the sort.Interface interface method Swap */
+// Implement the sort.Interface interface method Swap
 func (b brownianStateSlice) Swap(i, j int) {
 	b[i], b[j] = b[j], b[i]
 }

@@ -4,8 +4,8 @@ import (
 	"fmt"
 )
 
-/* A confidence interval associated with a value; it need not be
-/* symmetric. */
+// A confidence interval associated with a value; it need not be
+// symmetric.
 type CI struct {
 	// The [0, 1] confidence level
 	Level float64
@@ -15,8 +15,8 @@ type CI struct {
 	U float64
 }
 
-/* A estimate of some value, and the associated confidence
-/* interval. */
+// A estimate of some value, and the associated confidence
+// interval.
 type Estimate struct {
 	// The value
 	V float64
@@ -30,7 +30,7 @@ func (est *Estimate) String() string {
 		est.V, est.C.L, est.V, est.C.U)
 }
 
-/* Computes the mean and sample variance of the data provided. */
+// Computes the mean and sample variance of the data provided.
 func Summary(data []float64) (float64, float64) {
 	mean := 0.0
 	for _, v := range data {
@@ -47,7 +47,7 @@ func Summary(data []float64) (float64, float64) {
 	return mean, variance
 }
 
-/* Computes the mean of a slice of float64 */
+// Computes the mean of a slice of float64.
 func Mean(data []float64) float64 {
 	mean := 0.0
 	for _, v := range data {

@@ -5,8 +5,8 @@ import (
 	"math"
 )
 
-/* Returns a pdf of Student's t-distribution with d degrees of
-/* freedom. */
+// Returns a pdf of Student's t-distribution with d degrees of
+// freedom.
 func Student(d int) func(float64) float64 {
 	nu := float64(d)
 	coef := math.Gamma((nu+1)/2) / (math.Gamma(nu/2) * math.Sqrt(nu*math.Pi))
@@ -17,9 +17,9 @@ func Student(d int) func(float64) float64 {
 	}
 }
 
-/* Returns the cdf of the Student's t-distribution with d degrees of
-/* freedom. The cdf requires a second argument h as the step size of
-/* the integration used to compute the cdf. */
+// Returns the cdf of the Student's t-distribution with d degrees of
+// freedom. The cdf requires a second argument h as the step size of
+// the integration used to compute the cdf.
 func StudentCDF(d int, h float64) func(float64) float64 {
 	pdf := Student(d)
 
@@ -37,8 +37,8 @@ func StudentCDF(d int, h float64) func(float64) float64 {
 	}
 }
 
-/* Returns an inverse of the function returned by StudentCDF with
-/* identical argumentss. */
+// Returns an inverse of the function returned by StudentCDF with
+// identical argumentss.
 func InvStudentCDF(d int, h float64) func(float64) float64 {
 	const perr = 1e-5  // Acceptable percentile error
 	const berr = 1e-10 // Acceptable bounds error

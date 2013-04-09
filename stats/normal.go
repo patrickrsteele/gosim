@@ -5,7 +5,7 @@ import (
 	"math"
 )
 
-/* Returns the pdf of a N(mu, sigma^2) random variable. */
+// Returns the pdf of a N(mu, sigma^2) random variable.
 func Normal(mu float64, sigma float64) func(float64) float64 {
 	coef := 1.0 / (math.Sqrt(2*math.Pi) * sigma)
 	sigmasq := sigma * sigma
@@ -15,8 +15,8 @@ func Normal(mu float64, sigma float64) func(float64) float64 {
 	}
 }
 
-/* Returns the cdf of a N(mu, sigma^2) random variable, accurate to
-/* within h. */
+// Returns the cdf of a N(mu, sigma^2) random variable, accurate to
+// within h.
 func NormalCDF(mu, sigma, h float64) func(float64) float64 {
 	pdf := Normal(mu, sigma)
 
