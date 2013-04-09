@@ -46,3 +46,14 @@ func Summary(data []float64) (float64, float64) {
 
 	return mean, variance
 }
+
+/* Computes the mean of a slice of float64 */
+func Mean(data []float64) float64 {
+	mean := 0.0
+	for _, v := range data {
+		mean += v
+	}
+	mean /= float64(len(data))
+
+	return mean
+}
