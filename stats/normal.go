@@ -11,17 +11,16 @@ func Normal(mu float64, sigma float64) func(float64) float64 {
 	sigmasq := sigma * sigma
 
 	return func(x float64) float64 {
-		return coef * math.Exp((x-mu)*(x-mu)/(2.0*sigmasq))
+		return coef * math.Exp(-(x-mu)*(x-mu)/(2.0*sigmasq))
 	}
 }
 
-/* Returns the cdf of a N(mu, sigma^2) random variable. The returned
-/* cdf requires a second argument h as the step size of the
-/* integration used to compute the cdf. */
-func NormalCDF(mu float64, sigma float64) func(float64, float64) float64 {
+/* Returns the cdf of a N(mu, sigma^2) random variable, accurate to
+/* within h. */
+func NormalCDF(mu, sigma, h float64) func(float64) float64 {
 	pdf := Normal(mu, sigma)
 
-	return func(x float64, h float64) float64 {
+	return func(x float64) float64 {
 		// We know that this is a cdf with certain properties; exploit them
 		// to avoid unnecessary (innacurate) numerical integration
 		if x == mu {
@@ -39,7 +38,7 @@ func InvStandardNormalCDF(h float64) func(float64) float64 {
 	const perr = 1e-5  // Acceptable percentile error
 	const berr = 1e-10 // Acceptable bounds error
 
-	cdf := NormalCDF(0, 1)
+	cdf := NormalCDF(0, 1, h)
 
 	return func(p float64) float64 {
 
@@ -58,33 +57,23 @@ func InvStandardNormalCDF(h float64) func(float64) float64 {
 		if p > .5 {
 			L = 0
 			U = 1
-			hh := h
-			for cdf(U, hh) < p {
+			for cdf(U) < p {
 				U *= 2
-				hh *= 2
-				if hh > 1 {
-					hh = 1
-				}
 			}
 		} else {
 			U = 0
 			L = -1
-			hh := h
-			for cdf(L, hh) > p {
+			for cdf(L) > p {
 				L *= 2
-				hh *= 2
-				if hh > 1 {
-					hh = 1
-				}
 			}
 		}
 
 		// Start bisection; halt when we're close enough to the proper percentile, or no progress is made
-		pL := cdf(L, h)
-		pU := cdf(U, h)
+		pL := cdf(L)
+		pU := cdf(U)
 		for pU-pL > 2*perr && U-L > berr {
 			M := (L + U) / 2
-			pM := cdf(M, h)
+			pM := cdf(M)
 
 			if pM > p {
 				U = M
