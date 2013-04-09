@@ -1,8 +1,8 @@
 package gosim
 
 import (
+	"github.com/patrickrsteele/gosim/stats"
 	"github.com/skelterjohn/go.matrix"
-	"gosim/stats"
 	"math"
 )
 
