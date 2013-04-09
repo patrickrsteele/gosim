@@ -32,8 +32,6 @@ func (m *MonteCarloSimulation) Simulate(N int, alpha float64) *Estimate {
 		panic("N must be greater than 1")
 	}
 
-	n := float64(N)
-
 	// Run all trials, storing the results in ys and the controls in xs
 	ys := make([]float64, N)
 	xs := make([][]float64, N)
@@ -66,8 +64,10 @@ func create_estimate(data []float64, alpha float64) *Estimate {
 
 /* Return a Monte Carlo estimate of the parameter, using the data in
 /* xs[i] as a control variate for observation ys[i]. */
-func control_estimate(ys []float64, xs [][]float64) *Estimate {
+func control_estimate(ys []float64, xs [][]float64, alpha float64) *Estimate {
 	d := len(xs[0])
+	N := len(ys)
+	n := float64(N)
 
 	// Compute the means of the control variates
 	x_means := make([]float64, d)
