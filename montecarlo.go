@@ -1,6 +1,7 @@
 package gosim
 
 import (
+	"fmt"
 	"github.com/patrickrsteele/gosim/stats"
 	"github.com/skelterjohn/go.matrix"
 	"math"
@@ -56,7 +57,6 @@ func create_estimate(data []float64, alpha float64) *Estimate {
 	)
 
 	mean, variance := Summary(data)
-
 	coef := stats.InvStandardNormalCDF(h)(1 - alpha/2)
 	coef *= math.Sqrt(variance / float64(len(data)))
 
@@ -72,9 +72,9 @@ func control_estimate(ys []float64, xs [][]float64, alpha float64) *Estimate {
 
 	// Compute the means of the control variates
 	x_means := make([]float64, d)
-	for _, X := range xs {
+	for i, _ := range xs {
 		for j, _ := range x_means {
-			x_means[j] += X[j]
+			x_means[j] += xs[i][j]
 		}
 	}
 	for j, _ := range x_means {
@@ -120,7 +120,7 @@ func control_estimate(ys []float64, xs [][]float64, alpha float64) *Estimate {
 		yoff[i] = ys[i]
 
 		for j := 0; j < d; j++ {
-			yoff[j] -= b.Get(j, 0) * (xs[i][j] - x_means[j])
+			yoff[i] -= b.Get(j, 0) * (xs[i][j] - x_means[j])
 		}
 	}
 

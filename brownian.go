@@ -58,7 +58,7 @@ func (b *Brownian) At(t float64) float64 {
 		std_dev := math.Sqrt(t - b.states[U].t)
 		delta := b.Rand.NormFloat64() * std_dev
 		new_state.v = b.states[U].v + delta
-	} else if L == U {
+	} else if b.states[L].t == t || b.states[U].t == t {
 		// We've simulated this time before, simply return it
 		return b.states[L].v
 	} else {
@@ -124,5 +124,5 @@ func NewGeometricBrownian(rand *rand.Rand, scale, drift, volatility float64) *Ge
 func (b *GeometricBrownian) At(t float64) float64 {
 	v := b.Brownian.At(t)
 
-	return b.Scale * math.Exp((b.Drift-b.Volatility/2)*t+b.std_dev*v)
+	return b.Scale * math.Exp((b.Drift-b.Volatility/2.0)*t+b.std_dev*v)
 }
