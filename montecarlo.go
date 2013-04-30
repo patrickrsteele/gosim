@@ -1,7 +1,6 @@
 package gosim
 
 import (
-	"fmt"
 	"github.com/patrickrsteele/gosim/stats"
 	"github.com/skelterjohn/go.matrix"
 	"math"
