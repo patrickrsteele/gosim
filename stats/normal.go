@@ -5,45 +5,40 @@ import (
 	"math"
 )
 
-// Returns a pdf of Student's t-distribution with d degrees of
-// freedom.
-func Student(d int) func(float64) float64 {
-	nu := float64(d)
-	coef := math.Gamma((nu+1)/2) / (math.Gamma(nu/2) * math.Sqrt(nu*math.Pi))
-	exp := -(float64(nu + 1)) / 2
+// Returns the pdf of a N(mu, sigma^2) random variable.
+func Normal(mu float64, sigma float64) func(float64) float64 {
+	coef := 1.0 / (math.Sqrt(2*math.Pi) * sigma)
+	sigmasq := sigma * sigma
 
 	return func(x float64) float64 {
-		return coef * math.Pow(1+x*x/nu, exp)
+		return coef * math.Exp(-(x-mu)*(x-mu)/(2.0*sigmasq))
 	}
 }
 
-// Returns the cdf of the Student's t-distribution with d degrees of
-// freedom. The cdf requires a second argument h as the step size of
-// the integration used to compute the cdf.
-func StudentCDF(d int, h float64) func(float64) float64 {
-	pdf := Student(d)
+// Returns the cdf of a N(mu, sigma^2) random variable, accurate to
+// within h.
+func NormalCDF(mu, sigma, h float64) func(float64) float64 {
+	pdf := Normal(mu, sigma)
 
 	return func(x float64) float64 {
 		// We know that this is a cdf with certain properties; exploit them
 		// to avoid unnecessary (innacurate) numerical integration
-		if x == 0 {
+		if x == mu {
 			return .5
-		} else if x > 0 {
-			return .5 + goint.Integrate(pdf, 0, x, h)
+		} else if x > mu {
+			return .5 + goint.Integrate(pdf, mu, x, h)
 		}
 
-		// We have that x < 0
-		return .5 - goint.Integrate(pdf, x, 0, h)
+		// We have that x < mu
+		return .5 - goint.Integrate(pdf, x, mu, h)
 	}
 }
 
-// Returns an inverse of the function returned by StudentCDF with
-// identical argumentss.
-func InvStudentCDF(d int, h float64) func(float64) float64 {
+func InvStandardNormalCDF(h float64) func(float64) float64 {
 	const perr = 1e-5  // Acceptable percentile error
 	const berr = 1e-10 // Acceptable bounds error
 
-	cdf := StudentCDF(d, h)
+	cdf := NormalCDF(0, 1, h)
 
 	return func(p float64) float64 {
 
@@ -62,24 +57,14 @@ func InvStudentCDF(d int, h float64) func(float64) float64 {
 		if p > .5 {
 			L = 0
 			U = 1
-			hh := h
-			for StudentCDF(d, hh)(U) < p {
+			for cdf(U) < p {
 				U *= 2
-				hh *= 2
-				if hh > 1 {
-					hh = 1
-				}
 			}
 		} else {
 			U = 0
 			L = -1
-			hh := h
-			for StudentCDF(d, hh)(L) > p {
+			for cdf(L) > p {
 				L *= 2
-				hh *= 2
-				if hh > 1 {
-					hh = 1
-				}
 			}
 		}
 

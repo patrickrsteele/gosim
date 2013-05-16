@@ -1,7 +1,5 @@
 package gosim
 
-/* Generic queues */
-
 import (
 	"bytes"
 	"fmt"
@@ -19,7 +17,7 @@ type Queue interface {
 	States() []QueueState
 }
 
-/* The number of customers N in service in a Queue at time T */
+// The number of customers N in service in a Queue at time T
 type QueueState struct {
 	T float64
 	N int
@@ -29,8 +27,8 @@ func (qs *QueueState) String() string {
 	return fmt.Sprintf("[%.2f, %d]", qs.T, qs.N)
 }
 
-/* A Queue with Poisson arrivals, exponential service times, and c
-/* servers. */
+// A Queue with Poisson arrivals, exponential service times, and c
+// servers.
 type MMCQueue struct {
 	Rand    *rand.Rand
 	Arrival float64
